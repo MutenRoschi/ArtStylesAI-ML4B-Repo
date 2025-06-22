@@ -1,34 +1,32 @@
-import streamlit as st
 import torch
-from torchvision import transforms
-from PIL import Image
-import requests
-from io import BytesIO
-
-# Verknüpfung mit dem öffentlichen Google Drive Ordner "ML4B-CycleGAN"
-model_url = "https://drive.google.com/drive/folders/1rTzT78v7ssT4RZu1H1Lm36b3FRThT19Q?usp=sharing" 
-
-# Lade das Modell herunter
-def download_file_from_drive(url):
-    response = requests.get(url)
-    return response.content
+from torch import nn
+import gdown
 
 # Lade das CycleGAN-Modell
-class CycleGANModel(torch.nn.Module):
+class CycleGANModel(nn.Module):
     def __init__(self):
         super(CycleGANModel, self).__init__()
+        # Hier würdest du dein CycleGAN-Modell laden, z.B.:
+        # self.netG = load_generator_model()
 
     def forward(self, input_image):
         # Vorhersage und Umwandlung des Bildes
-        return transformed_image
+        return transformed_image  # zurückgegebenes Bild
 
-# Laden des Modells
-model_data = download_file_from_drive(model_url)
-checkpoint = torch.load(BytesIO(model_data))
-model = CycleGANModel()
-model.load_state_dict(checkpoint)
 
-# Bildtransformationsfunktion
+# Laden des Modells von einer URL
+def load_model_from_drive():
+    url = 'https://drive.google.com/uc?id=deine_file_id'  # Google Drive URL
+    output = 'latest_net_G_A.pth'
+    gdown.download(url, output, quiet=False)  # Download der Modell-Datei
+    model = CycleGANModel()
+    checkpoint = torch.load(output)
+    model.load_state_dict(checkpoint)
+    return model
+
+# Lade das Modell
+model = load_model_from_drive()
+
 def transform_image(uploaded_image):
     transform = transforms.Compose([
         transforms.Resize(256),
@@ -36,9 +34,13 @@ def transform_image(uploaded_image):
         transforms.ToTensor(),
     ])
     image = transform(uploaded_image)
-    image = image.unsqueeze(0)  
+    image = image.unsqueeze(0)  # Batch-Dimension hinzufügen
     transformed_image = model(image)
     return transformed_image
+
+# Streamlit-App
+import streamlit as st
+from PIL import Image
 
 def main():
     st.title("Baroque to Realism - CycleGAN Style Transfer")
@@ -46,6 +48,7 @@ def main():
     uploaded_file = st.file_uploader("Wähle ein Bild", type=["png", "jpg", "jpeg"])
     
     if uploaded_file is not None:
+        # Lade das Bild
         image = Image.open(uploaded_file)
         st.image(image, caption="Eingabebild", use_column_width=True)
 
@@ -55,4 +58,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
