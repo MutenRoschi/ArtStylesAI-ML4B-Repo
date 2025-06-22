@@ -16,7 +16,7 @@ class CycleGANModel(nn.Module):
 
 # Laden des Modells von einer URL
 def load_model_from_drive():
-    url = 'https://drive.google.com/uc?id=deine_file_id'  # Google Drive URL
+    url = 'https://drive.google.com/uc?export=download&id=1tlUGX7lDPnCohK8Q_pqG47ALYbeS468g'  # Google Drive URL
     output = 'latest_net_G_A.pth'
     gdown.download(url, output, quiet=False)  # Download der Modell-Datei
     model = CycleGANModel()
