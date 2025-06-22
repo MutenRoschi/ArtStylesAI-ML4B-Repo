@@ -1,5 +1,7 @@
-streamlit
 torch
 torchvision
-Pillow
+streamlit
 gdown
+Pillow
+numpy
+
