@@ -1,4 +1,3 @@
-# app.py
 import os
 import gdown
 import torch
@@ -6,20 +5,20 @@ import streamlit as st
 from PIL import Image
 from torchvision import transforms
 
-# --- 1. Generator-Architektur aus dem CycleGAN-Repo --------------------------
-from models.networks import define_G      # liegt jetzt in deinem Repo
+# 1. Generator-Architektur aus de CycleGAN-Repo 
+from models.networks import define_G      # liegt jetzt in unserem Repo
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 @st.cache_resource   # nur 1× pro Session laden
 def load_generator():
-    # Google-Drive-Link der .pth-Datei  (nur **eine** Datei, kein Ordner!)
+    # Google-Drive-Link der .pth-Datei (beinhaltet die Gewichtungen, wichtig!)
     url = "https://drive.google.com/uc?id=1tlUGX7lDPnCohK8Q_pqG47ALYbeS468g"
     ckpt_path = "latest_net_G_A.pth"
     if not os.path.exists(ckpt_path):
         gdown.download(url, ckpt_path, quiet=False)
 
-    # Architektur exakt wie im Training: 3→3 Kanäle, ResNet-9-Blöcke, InstanceNorm
+    # Architektur exakt wie im Training:
     netG = define_G(
         input_nc=3, output_nc=3, ngf=64,
         netG="resnet_9blocks",
@@ -28,13 +27,13 @@ def load_generator():
     )
 
     state_dict = torch.load(ckpt_path, map_location=DEVICE)
-    netG.load_state_dict(state_dict)        #  <- KEIN Fehler mehr
+    netG.load_state_dict(state_dict)       
     netG.to(DEVICE).eval()
     return netG
 
 GEN = load_generator()
 
-# --- 2. Hilfsfunktionen ------------------------------------------------------
+# 2. Hilfsfunktionen 
 TRANSFORM_IN = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(256),
@@ -50,7 +49,7 @@ def stylize(pil_img):
     y = (y * 0.5 + 0.5).clamp(0, 1).cpu()
     return transforms.ToPILImage()(y)
 
-# --- 3. Streamlit-UI ---------------------------------------------------------
+# 3. Streamlit-UI 
 st.title("🎨 Baroque → Realism Style Transfer (CycleGAN)")
 
 uploaded = st.file_uploader("Bild hochladen", type=["png", "jpg", "jpeg"])
